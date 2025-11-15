@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Two User Chat App</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    body {
+      background: #0f172a;
+      color: #e5e7eb;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .app {
+      background: #020617;
+      border-radius: 16px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+      width: 100%;
+      max-width: 960px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 1px solid #1e293b;
+    }
+
+    .app-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: radial-gradient(circle at top left, #22c55e33, transparent 55%);
+    }
+
+    .app-header h1 {
+      font-size: 18px;
+      font-weight: 600;
+    }
+
+    .badge {
+      font-size: 11px;
+      padding: 4px 10px;
+      border-radius: 999px;
+      background: #1e293b;
+      color: #a5b4fc;
+      border: 1px solid #334155;
+    }
+
+    .chat-main {
+      display: grid;
+      grid-template-columns: 2fr 1.2fr;
+      gap: 0;
+      min-height: 420px;
+    }
+
+    /* Shared chat window */
+    .chat-window {
+      border-right: 1px solid #1e293b;
+      display: flex;
+      flex-direction: column;
+      background: radial-gradient(circle at bottom right, #0ea5e933, transparent 50%);
+    }
+
+    .chat-window-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid #1e293b;
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #9ca3af;
+    }
+
+    .messages {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .message {
+      max-width: 80%;
+      padding: 8px 12px;
+      border-radius: 12px;
+      font-size: 13px;
+      line-height: 1.4;
+      position: relative;
+      display: inline-flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .message.user1 {
+      align-self: flex-start;
+      background: #111827;
+      border-bottom-left-radius: 4px;
+      border: 1px solid #1f2937;
+    }
+
+    .message.user2 {
+      align-self: flex-end;
+      background: #1d4ed8;
+      border-bottom-right-radius: 4px;
+      color: #e5e7eb;
+    }
+
+    .message-meta {
+      font-size: 10px;
+      opacity: 0.7;
+      display: flex;
+      justify-content: space-between;
+      gap: 6px;
+    }
+
+    .sender-label {
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+
+    .timestamp {
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Side inputs */
+    .side-panel {
+      display: flex;
+      flex-direction: column;
+      background: #020617;
+    }
+
+    .side-panel-header {
+      padding: 12px 16px;
+      border-bottom: 1px solid #1e293b;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 13px;
+    }
+
+    .user-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 9px;
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      font-size: 11px;
+    }
+
+    .user-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 999px;
+    }
+
+    .user1-dot {
+      background: #22c55e;
+    }
+
+    .user2-dot {
+      background: #38bdf8;
+    }
+
+    .side-panel-body {
+      flex: 1;
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      font-size: 12px;
+      color: #9ca3af;
+    }
+
+    .side-panel-body p {
+      line-height: 1.4;
+    }
+
+    .hint {
+      font-size: 11px;
+      opacity: 0.8;
+    }
+
+    .side-panel-footer {
+      padding: 12px 16px 14px;
+      border-top: 1px solid #1e293b;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    input[type="text"] {
+      flex: 1;
+      padding: 8px 10px;
+      border-radius: 999px;
+      border: 1px solid #1f2937;
+      background: #020617;
+      color: #e5e7eb;
+      font-size: 13px;
+      outline: none;
+    }
+
+    input[type="text"]::placeholder {
+      color: #6b7280;
+    }
+
+    input[type="text"]:focus {
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 1px rgba(59, 130, 246, 0.4);
+    }
+
+    button {
+      border: none;
+      border-radius: 999px;
+      padding: 8px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      font-weight: 500;
+      background: #3b82f6;
+      color: #e5e7eb;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    button:active {
+      transform: translateY(1px);
+      filter: brightness(0.95);
+    }
+
+    button.secondary {
+      background: #111827;
+      border: 1px solid #1f2937;
+      font-size: 11px;
+      padding: 5px 10px;
+    }
+
+    @media (max-width: 768px) {
+      .chat-main {
+        grid-template-columns: 1fr;
+      }
+
+      .chat-window {
+        border-right: none;
+        border-bottom: 1px solid #1e293b;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="app-header">
+      <h1>Chat Application</h1>
+      <div class="badge">Local demo</div>
+    </header>
+
+    <div class="chat-main">
+      <!-- Shared chat window -->
+      <section class="chat-window">
+        <div class="chat-window-header">Conversation</div>
+        <div id="messages" class="messages"></div>
+      </section>
+
+      <!-- Side panel: inputs for User 1 and User 2 -->
+      <aside class="side-panel">
+        <div class="side-panel-header">
+          <span>Controls</span>
+          <span style="font-size:11px; color:#6b7280;">Use both sides like 2 devices</span>
+        </div>
+
+        <div class="side-panel-body">
+          <div>
+            <div class="user-tag">
+              <span class="user-dot user1-dot"></span>
+              <span>User 1 (Left)</span>
+            </div>
+            <p class="hint">Type as User&nbsp;1 and hit <b>Send U1</b> or press <b>Enter</b> in User 1 box.</p>
+          </div>
+
+          <div>
+            <div class="user-tag">
+              <span class="user-dot user2-dot"></span>
+              <span>User 2 (Right)</span>
+            </div>
+            <p class="hint">Type as User &nbsp;2 and hit <b>Send U2</b> or press <b>Enter</b> in User 2 box.</p>
+          </div>
+        </div>
+
+        <div class="side-panel-footer">
+          <div class="input-row">
+            <input
+              id="inputUser1"
+              type="text"
+              placeholder="User 1: type a message…"
+            />
+            <button id="btnUser1">Send U1</button>
+          </div>
+          <div class="input-row">
+            <input
+              id="inputUser2"
+              type="text"
+              placeholder="User 2: type a message…"
+            />
+            <button id="btnUser2">Send U2</button>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:2px;">
+            <span class="hint"> This is for Demo.</span>
+            <button id="clearChat" class="secondary">Clear chat</button>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    const messagesEl = document.getElementById("messages");
+    const inputUser1 = document.getElementById("inputUser1");
+    const inputUser2 = document.getElementById("inputUser2");
+    const btnUser1 = document.getElementById("btnUser1");
+    const btnUser2 = document.getElementById("btnUser2");
+    const clearChatBtn = document.getElementById("clearChat");
+
+    function formatTime(date) {
+      const h = String(date.getHours()).padStart(2, "0");
+      const m = String(date.getMinutes()).padStart(2, "0");
+      return `${h}:${m}`;
+    }
+
+    function addMessage(sender, text) {
+      if (!text.trim()) return;
+
+      const messageDiv = document.createElement("div");
+      const now = new Date();
+      const senderLabel = sender === "user1" ? "User 1" : "User 2";
+
+      messageDiv.classList.add("message", sender);
+
+      messageDiv.innerHTML = `
+        <div class="message-text">${text}</div>
+        <div class="message-meta">
+          <span class="sender-label">${senderLabel}</span>
+          <span class="timestamp">${formatTime(now)}</span>
+        </div>
+      `;
+
+      messagesEl.appendChild(messageDiv);
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    btnUser1.addEventListener("click", () => {
+      addMessage("user1", inputUser1.value);
+      inputUser1.value = "";
+      inputUser1.focus();
+    });
+
+    btnUser2.addEventListener("click", () => {
+      addMessage("user2", inputUser2.value);
+      inputUser2.value = "";
+      inputUser2.focus();
+    });
+
+    inputUser1.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        btnUser1.click();
+      }
+    });
+
+    inputUser2.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        btnUser2.click();
+      }
+    });
+
+    clearChatBtn.addEventListener("click", () => {
+      messagesEl.innerHTML = "";
+      inputUser1.value = "";
+      inputUser2.value = "";
+      inputUser1.focus();
+    });
+  </script>
+</body>
+</html>
